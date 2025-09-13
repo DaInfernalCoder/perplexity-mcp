@@ -2,10 +2,6 @@
 
 An intelligent research assistant powered by Perplexity's specialized AI models. Features automatic query complexity detection to route requests to the most appropriate model for optimal results. Unlike the Official server, it has search capabilities FOR EVERY TASK, essentially 
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=DaInfernalCoder/perplexity-mcp&type=Date)](https://www.star-history.com/#DaInfernalCoder/perplexity-mcp&Date)
-
 ## Tools
 
 **Quick Note: The Deep Research tool is going to timeout with some tools like cline, but not with others like cursor due to implementation differences, but the reason tool makes up for it.**
@@ -126,4 +122,6 @@ Or use NPX to not have to install it locally (recommended for macos):
   }
 }
 ```
+## Star History
 
+[![Star History Chart](https://api.star-history.com/svg?repos=DaInfernalCoder/perplexity-mcp&type=Timeline)](https://www.star-history.com/#DaInfernalCoder/perplexity-mcp&Timeline)
