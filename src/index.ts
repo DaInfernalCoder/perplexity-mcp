@@ -9,14 +9,122 @@ import {
   ErrorCode,
 } from "@modelcontextprotocol/sdk/types.js";
 import axios from "axios";
-import { existsSync, mkdirSync } from "fs";
-import { dirname, join } from "path";
-import { homedir } from "os";
+import minimist from "minimist";
+import * as fs from "fs";
+import * as path from "path";
 
-const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
-if (!PERPLEXITY_API_KEY) {
-  throw new Error("PERPLEXITY_API_KEY environment variable is required");
+// Parse command-line arguments
+const args = minimist(process.argv.slice(2), {
+  string: ['api-key', 'cwd'],
+  alias: {
+    'api-key': 'apiKey'
+  }
+});
+
+// Extracts PERPLEXITY_API_KEY from an .env file content
+function extractApiKey(content: string): string | null {
+  const lines = content.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Skip empty lines and comments
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+
+    // Look specifically for PERPLEXITY_API_KEY
+    if (trimmed.startsWith('PERPLEXITY_API_KEY=')) {
+      const value = trimmed.substring('PERPLEXITY_API_KEY='.length).trim();
+
+      // Remove surrounding quotes if present
+      let clean = value;
+      if ((clean.startsWith('"') && clean.endsWith('"')) ||
+        (clean.startsWith("'") && clean.endsWith("'"))) {
+        clean = clean.slice(1, -1);
+      }
+
+      if (clean && clean.length > 0) {
+        return clean;
+      }
+    }
+  }
+
+  return null;
 }
+
+// Read .env file from specified directory and extract PERPLEXITY_API_KEY.
+// Returns null if file does not exist or does not contain PERPLEXITY_API_KEY.
+function readEnvFile(dir: string): string | null {
+  const envPath = path.join(dir, '.env');
+
+  if (!fs.existsSync(envPath)) {
+    return null;
+  }
+
+  try {
+    const content = fs.readFileSync(envPath, 'utf8');
+    return extractApiKey(content);
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Resolves API key using simple three-step logic. Priority:
+ * 1. Command-line argument (--api-key),
+ * 2. Environment variable (PERPLEXITY_API_KEY),
+ * 3. .env file with --cwd (fallback option)
+ */
+function getApiKey(): string {
+  // 1. Command-line argument (highest priority)
+  if (args['api-key']) {
+    sanitizeArgs();
+    return args['api-key'];
+  }
+
+  // 2. Environment variable
+  if (process.env.PERPLEXITY_API_KEY) {
+    return process.env.PERPLEXITY_API_KEY;
+  }
+
+  // 3. .env file (with --cwd PROJECT_DIR specified)
+  if (args.cwd) {
+    const key = readEnvFile(args.cwd);
+    if (key) return key;
+  }
+
+  // Error if none found
+  throw new Error(`
+Perplexity API key is required. Please provide it using one of these three methods (in priority order):
+
+1. Environment variable (PREFERRED): PERPLEXITY_API_KEY=your-api-key
+2. Command-line argument: --api-key your-api-key  
+3. .env file with --cwd: Create .env file with PERPLEXITY_API_KEY=your-api-key and specify directory
+
+Examples:
+• Environment variable: export PERPLEXITY_API_KEY="your-key-here" && npx perplexity-mcp
+• Command-line: npx perplexity-mcp --api-key "your-key-here"
+• .env file: npx perplexity-mcp --cwd /path/to/project
+
+The environment variable method is preferred and most secure for production use.
+Note: Automatic .env file discovery has been removed - you must use --cwd to specify the directory.
+  `.trim());
+}
+
+// Overwrites API key arguments in process.argv to minimize exposure in process list
+// This reduces the window where the API key is visible to other processes
+function sanitizeArgs(): void {
+  for (let i = 0; i < process.argv.length; i++) {
+    if (process.argv[i] === '--api-key' && i + 1 < process.argv.length) {
+      process.argv[i + 1] = '***REDACTED***';
+    } else if (process.argv[i].startsWith('--api-key=')) {
+      process.argv[i] = '--api-key=***REDACTED***';
+    }
+  }
+}
+
+const PERPLEXITY_API_KEY = getApiKey();
 
 class PerplexityServer {
   private server: Server;
@@ -44,7 +152,7 @@ class PerplexityServer {
     });
 
     this.setupToolHandlers();
-    
+
     // Error handling
     this.server.onerror = (error) => console.error("[MCP Error]", error);
     process.on("SIGINT", async () => {
@@ -63,7 +171,7 @@ class PerplexityServer {
       "comprehensive", "detailed", "in-depth", "thorough",
       "compare and contrast", "evaluate", "assess"
     ];
-    
+
     // Check for complex reasoning indicators
     const complexIndicators = [
       "how", "why", "what if", "explain", "solve", "steps to",
@@ -199,9 +307,9 @@ class PerplexityServer {
           case "deep_research": {
             model = "sonar-deep-research";
             const { focus_areas = [] } = request.params.arguments as { focus_areas?: string[] };
-            
+
             prompt = `Conduct comprehensive research on: ${query}`;
-            
+
             if (focus_areas.length > 0) {
               prompt += `\n\nFocus areas:\n${focus_areas.map((area, i) => `${i + 1}. ${area}`).join('\n')}`;
             }
@@ -236,8 +344,8 @@ class PerplexityServer {
         // these are referred to in the return text as numbered citations e.g. [1]
         const sourcesText = response.data.citations
           ? `\n\n## Sources\nPlease keep the numbered citations inline.\n${response.data.citations
-              .map((c: string, i: number) => `${i + 1}: ${c}`)
-              .join("\n")}`
+            .map((c: string, i: number) => `${i + 1}: ${c}`)
+            .join("\n")}`
           : "";
 
         return {

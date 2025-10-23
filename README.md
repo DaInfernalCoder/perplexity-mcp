@@ -120,6 +120,49 @@ Or use NPX to not have to install it locally (recommended for macos):
   }
 }
 ```
+In case the MCP Client is not able to parse the Perplexity API Key from the
+environment using methods like `"${env:PERPLEXITY_API_KEY}"` common in modern
+AI Coding Agents (e.g. Kiro), there are two fallback solutions:
+
+**Command-Line Argument**: Pass the API key directly as a command-line argument, and you can even try to see whether "${env:PERPLEXITY_API_KEY}" works in there.
+
+```json
+{
+  "mcpServers": {
+    "perplexity": {
+      "command": "node",
+      "args": [
+        "/path/to/perplexity-server/build/index.js",
+        "--api-key",
+        "your_api_key_here"
+      ],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+**Read an explicit `.env` File**: specify the location of the project `.env` file with the environment variables and API keys for your current project with the `--cwd` command-line argument, and the MCP Server will read the `.env` file from the directory finding the Perplexity API Key from there.
+
+```json
+{
+  "mcpServers": {
+    "perplexity": {
+      "command": "node",
+      "args": [
+        "/path/to/perplexity-server/build/index.js",
+        "--cwd",
+        "/path/to/your/project"
+      ],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+**Priority Order**: Command-line argument > Environment variable > .env file with `--cwd` (path needed)
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=DaInfernalCoder/perplexity-mcp&type=Timeline)](https://www.star-history.com/#DaInfernalCoder/perplexity-mcp&Timeline)
