@@ -4,8 +4,6 @@ An intelligent research assistant powered by Perplexity's specialized AI models.
 
 ## Tools
 
-**Quick Note: The Deep Research tool is going to timeout with some tools like cline, but not with others like cursor due to implementation differences, but the reason tool makes up for it.**
-
 ### 1. Search (Sonar Pro)
 Quick search for simple queries and basic information lookup. Best for straightforward questions that need concise, direct answers.
 
