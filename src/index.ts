@@ -268,7 +268,7 @@ class PerplexityServer {
             properties: {
               query: {
                 type: "string",
-                description: "The search query or question. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n\nThe more specific details you include, the more accurate and helpful the answer will be."
+                description: "The search query or question. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n\nThe more specific details you include, the more accurate and helpful the answer will be.\nIf you don't have enough specific information, prompt the user to provide it before using this tool."
               },
               force_model: {
                 type: "boolean",
@@ -287,7 +287,7 @@ class PerplexityServer {
             properties: {
               query: {
                 type: "string",
-                description: "The complex query or task to reason about. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n- Include relevant data structures, configurations, or inputs\n\nThe more specific details you include, the more accurate and helpful the answer will be."
+                description: "The complex query or task to reason about. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n- Include relevant data structures, configurations, or inputs\n\nThe more specific details you include, the more accurate and helpful the answer will be.\nIf you don't have enough specific information, prompt the user to provide it before using this tool."
               },
               force_model: {
                 type: "boolean",
@@ -306,7 +306,7 @@ class PerplexityServer {
             properties: {
               query: {
                 type: "string",
-                description: "The research topic or question to investigate in depth. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n- Include relevant data structures, configurations, or inputs\n- Specify the scope, constraints, or specific requirements\n\nThe more specific details you include, the more accurate and helpful the answer will be."
+                description: "The research topic or question to investigate in depth. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n- Include relevant data structures, configurations, or inputs\n- Specify the scope, constraints, or specific requirements\n\nThe more specific details you include, the more accurate and helpful the answer will be.\nIf you don't have enough specific information, prompt the user to provide it before using this tool."
               },
               focus_areas: {
                 type: "array",
