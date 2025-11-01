@@ -2,6 +2,8 @@
 
 An intelligent research assistant powered by Perplexity's specialized AI models. Features automatic query complexity detection to route requests to the most appropriate model for optimal results. Unlike the Official server, it has search capabilities FOR EVERY TASK, essentially 
 
+It also forces the agent using the MCP to be specific
+
 ## Tools
 
 ### 1. Search (Sonar Pro)
