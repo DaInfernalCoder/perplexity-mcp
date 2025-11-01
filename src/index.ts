@@ -206,7 +206,7 @@ class PerplexityServer {
             properties: {
               query: {
                 type: "string",
-                description: "The search query or question"
+                description: "The search query or question. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n\nThe more specific details you include, the more accurate and helpful the answer will be."
               },
               force_model: {
                 type: "boolean",
@@ -225,7 +225,7 @@ class PerplexityServer {
             properties: {
               query: {
                 type: "string",
-                description: "The complex query or task to reason about"
+                description: "The complex query or task to reason about. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n- Include relevant data structures, configurations, or inputs\n\nThe more specific details you include, the more accurate and helpful the answer will be."
               },
               force_model: {
                 type: "boolean",
@@ -244,7 +244,7 @@ class PerplexityServer {
             properties: {
               query: {
                 type: "string",
-                description: "The research topic or question to investigate in depth"
+                description: "The research topic or question to investigate in depth. IMPORTANT: Be extremely specific and include all relevant details:\n- Include exact error messages, logs, and stack traces if applicable\n- Provide exact terminology, function names, API names, version numbers\n- Include relevant code snippets showing the problem or context\n- Specify platform, OS, framework versions, and environment details\n- Mention any attempted solutions or workarounds\n- Provide context about what you're trying to achieve\n- Include relevant data structures, configurations, or inputs\n- Specify the scope, constraints, or specific requirements\n\nThe more specific details you include, the more accurate and helpful the answer will be."
               },
               focus_areas: {
                 type: "array",
@@ -289,18 +289,27 @@ class PerplexityServer {
         switch (selectedTool) {
           case "search": {
             model = "sonar-pro";
-            prompt = `Provide a clear, concise answer to: ${query}`;
+            prompt = `You are answering a query that should contain specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Use all provided details to give the most accurate answer possible.
+
+Query: ${query}
+
+Provide a clear, concise answer that directly addresses the specific details in the query.`;
             break;
           }
 
           case "reason": {
             model = "sonar-reasoning-pro";
-            prompt = `Provide a detailed explanation and analysis for: ${query}. Include:
-            1. Step-by-step reasoning
-            2. Key considerations
-            3. Relevant examples
-            4. Practical implications
-            5. Potential alternatives`;
+            prompt = `You are answering a query that should contain specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Carefully analyze all provided details to give the most accurate and helpful answer.
+
+Query: ${query}
+
+Provide a detailed explanation and analysis that:
+1. Addresses the specific details provided (errors, logs, code, versions, etc.)
+2. Includes step-by-step reasoning based on the actual context
+3. Identifies key considerations relevant to the specific situation
+4. Provides relevant examples matching the described scenario
+5. Offers practical implications based on the exact details provided
+6. Suggests potential alternatives or solutions tailored to the specific context`;
             break;
           }
 
@@ -308,23 +317,26 @@ class PerplexityServer {
             model = "sonar-deep-research";
             const { focus_areas = [] } = request.params.arguments as { focus_areas?: string[] };
 
-            prompt = `Conduct comprehensive research on: ${query}`;
+            prompt = `You are answering a research query that should contain specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Use all provided details to conduct the most accurate and comprehensive research.
+
+Research Query: ${query}`;
 
             if (focus_areas.length > 0) {
               prompt += `\n\nFocus areas:\n${focus_areas.map((area, i) => `${i + 1}. ${area}`).join('\n')}`;
             }
 
-            prompt += `\n\nProvide a detailed analysis including:
-            1. Background and context
-            2. Key concepts and definitions
-            3. Current state of knowledge
-            4. Different perspectives
-            5. Recent developments
-            6. Practical applications
-            7. Challenges and limitations
-            8. Future directions
-            9. Expert opinions
-            10. References to sources`;
+            prompt += `\n\nProvide a detailed analysis that:
+1. Incorporates and addresses all specific details provided (errors, logs, code, versions, configurations, etc.)
+2. Provides background and context relevant to the specific scenario described
+3. Defines key concepts and terminology matching the exact terms used
+4. Presents the current state of knowledge relevant to the specific problem or topic
+5. Explores different perspectives applicable to the described situation
+6. Covers recent developments that relate to the specific details provided
+7. Discusses practical applications relevant to the exact context
+8. Identifies challenges and limitations specific to the scenario
+9. Suggests future directions or solutions based on the specific details
+10. Includes expert opinions and references to sources that address the specific issue
+11. Tailors all recommendations to the exact technical context, versions, and environment described`;
             break;
           }
 
