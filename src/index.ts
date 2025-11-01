@@ -134,7 +134,7 @@ class PerplexityServer {
     this.server = new Server(
       {
         name: "perplexity-server",
-        version: "0.2.0",
+        version: "0.2.1",
       },
       {
         capabilities: {
@@ -159,6 +159,68 @@ class PerplexityServer {
       await this.server.close();
       process.exit(0);
     });
+  }
+
+  /**
+   * Checks if a query contains specific details needed for accurate responses
+   * Returns array of missing details, empty if sufficient
+   */
+  private detectMissingDetails(query: string): string[] {
+    const queryLower = query.toLowerCase();
+    const missingDetails: string[] = [];
+
+    // Check for error messages, stack traces, or error-related terms
+    const hasErrors = /error|exception|failure|crash|traceback|stack trace|failed/i.test(query) ||
+                     /Error:|Exception:|at\s+\w+\.\w+/i.test(query);
+    
+    // Check for code snippets (common patterns)
+    const hasCode = /```|function\s+\w+|const\s+\w+|let\s+\w+|var\s+\w+|import\s+|require\(|\.\w+\(/i.test(query) ||
+                    /[a-z]\w*\([^)]*\)/i.test(query) || // function calls
+                    /\w+\.\w+\s*=/i.test(query); // property assignments
+
+    // Check for version numbers
+    const hasVersions = /\d+\.\d+(\.\d+)?/i.test(query) || /version\s*\d+|v\d+/i.test(query);
+
+    // Check for specific API/function names (camelCase, PascalCase, or names with dots)
+    const hasSpecificNames = /[A-Z][a-z]+[A-Z]|\.\w+\(|::\w+|api\.|sdk\./i.test(query);
+
+    // Check for logs or console output
+    const hasLogs = /log|console|output|print|trace|debug/i.test(query) && 
+                    (query.length > 100 || /\n/.test(query));
+
+    // Check for environment/platform details
+    const hasEnvironment = /node|python|java|javascript|typescript|react|vue|angular|linux|windows|macos|ubuntu|docker/i.test(queryLower);
+
+    // Determine missing details for technical queries
+    if (hasErrors && !hasCode && !hasLogs) {
+      missingDetails.push("code snippets showing the error context");
+      missingDetails.push("relevant logs or stack traces");
+    }
+    
+    if (!hasVersions && (hasCode || hasEnvironment)) {
+      missingDetails.push("version numbers (framework, library, runtime versions)");
+    }
+
+    if (!hasSpecificNames && (hasCode || hasErrors)) {
+      missingDetails.push("exact function names, API endpoints, or library names");
+    }
+
+    if (hasErrors && !hasEnvironment) {
+      missingDetails.push("environment details (OS, runtime version, framework)");
+    }
+
+    // If query seems technical/problem-solving but lacks specifics
+    const seemsTechnical = hasErrors || hasCode || /problem|issue|bug|fix|solution|how to|why|debug/i.test(queryLower);
+    
+    if (seemsTechnical && missingDetails.length === 0) {
+      // Still check if it could be more specific
+      if (query.length < 50 && !hasCode && !hasErrors) {
+        missingDetails.push("specific error messages or code snippets");
+        missingDetails.push("exact terminology and context");
+      }
+    }
+
+    return missingDetails;
   }
 
   /**
@@ -289,7 +351,7 @@ class PerplexityServer {
         switch (selectedTool) {
           case "search": {
             model = "sonar-pro";
-            prompt = `You are answering a query that should contain specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Use all provided details to give the most accurate answer possible.
+            prompt = `You are answering a query that contains specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Use all provided details to give the most accurate answer possible.
 
 Query: ${query}
 
@@ -299,7 +361,7 @@ Provide a clear, concise answer that directly addresses the specific details in 
 
           case "reason": {
             model = "sonar-reasoning-pro";
-            prompt = `You are answering a query that should contain specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Carefully analyze all provided details to give the most accurate and helpful answer.
+            prompt = `You are answering a query that contains specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Carefully analyze all provided details to give the most accurate and helpful answer.
 
 Query: ${query}
 
@@ -317,7 +379,7 @@ Provide a detailed explanation and analysis that:
             model = "sonar-deep-research";
             const { focus_areas = [] } = request.params.arguments as { focus_areas?: string[] };
 
-            prompt = `You are answering a research query that should contain specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Use all provided details to conduct the most accurate and comprehensive research.
+            prompt = `You are answering a research query that contains specific details like error messages, logs, code snippets, exact terminology, version numbers, and context. Use all provided details to conduct the most accurate and comprehensive research.
 
 Research Query: ${query}`;
 
@@ -352,6 +414,9 @@ Research Query: ${query}`;
           messages: [{ role: "user", content: prompt }],
         });
 
+        // Detect what details were missing from the original query
+        const missingDetails = this.detectMissingDetails(query);
+
         // response.data can have a string[] .citations
         // these are referred to in the return text as numbered citations e.g. [1]
         const sourcesText = response.data.citations
@@ -360,10 +425,18 @@ Research Query: ${query}`;
             .join("\n")}`
           : "";
 
+        // Add note about missing details if any were detected
+        let responseText = response.data.choices[0].message.content + sourcesText;
+        
+        if (missingDetails.length > 0) {
+          const missingList = missingDetails.map((detail, i) => `${i + 1}. ${detail}`).join('\n');
+          responseText += `\n\n---\n\n**Note**: I didn't have the following details which would help provide a more specific and accurate answer:\n\n${missingList}\n\nIf you'd like a more precise response, please provide these details and ask again.`;
+        }
+
         return {
           content: [{
             type: "text",
-            text: response.data.choices[0].message.content + sourcesText,
+            text: responseText,
           }]
         };
       } catch (error) {
