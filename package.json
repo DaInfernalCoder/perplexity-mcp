@@ -1,6 +1,6 @@
 {
   "name": "perplexity-mcp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "MCP server providing intelligent search, reasoning, and research capabilities powered by Perplexity's specialized AI models",
   "type": "module",
   "bin": "./build/index.js",
