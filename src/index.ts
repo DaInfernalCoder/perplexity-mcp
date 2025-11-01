@@ -134,7 +134,7 @@ class PerplexityServer {
     this.server = new Server(
       {
         name: "perplexity-server",
-        version: "0.2.2",
+        version: "0.2.3",
       },
       {
         capabilities: {
