@@ -53,28 +53,6 @@ const result = await use_mcp_tool({
 });
 ```
 
-## Intelligent Model Selection
-
-The server automatically analyzes query complexity to route requests to the most appropriate model:
-
-1. **Simple Queries** → Sonar Pro
-   - Basic information lookup
-   - Straightforward questions
-   - Quick facts
-
-2. **Complex Queries** → Sonar Reasoning Pro
-   - How/why questions
-   - Comparisons
-   - Step-by-step explanations
-   - Problem-solving tasks
-
-3. **Research Queries** → Sonar Deep Research
-   - In-depth analysis
-   - Comprehensive research
-   - Detailed investigations
-   - Multi-faceted topics
-
-You can override the automatic selection using `force_model: true` in any tool's arguments.
 
 ## Setup
 
