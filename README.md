@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/dainfernalcoder-perplexity-mcp-badge.png)](https://mseep.ai/app/dainfernalcoder-perplexity-mcp)
+
 # Perplexity MCP Server
 
 An intelligent research assistant powered by Perplexity's specialized AI models. Features automatic query complexity detection to route requests to the most appropriate model for optimal results. Unlike the Official server, it has search capabilities FOR EVERY TASK, essentially 
