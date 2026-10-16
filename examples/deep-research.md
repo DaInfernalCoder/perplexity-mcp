@@ -25,7 +25,7 @@ console.log(result);
 
 - `query` (required): The research query or topic to investigate in depth
 - `focus_areas` (optional): An array of specific aspects or areas to focus on during research
-- `output_format` (optional): Format of the response (text or dropdown), defaults to "text"
+- `force_model` (optional): Force using this model even if the query seems simple, defaults to `false`
 
 ## Example Response
 

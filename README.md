@@ -61,7 +61,17 @@ const result = await use_mcp_tool({
    - Perplexity API key (from [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api))
    - clone the repo somewhere
 
-2. **Configure MCP Settings**
+2. **Install and build (for the local Node.js configuration below)**
+
+```sh
+cd /path/to/perplexity-server
+npm ci
+npm run build
+```
+
+Use the absolute path to the generated `build/index.js` in your MCP settings. The NPX option below does not require this local build.
+
+3. **Configure MCP Settings**
 
 Add to your MCP settings file (location varies by platform):
 
